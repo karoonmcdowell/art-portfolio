@@ -1,3 +1,4 @@
+const USE_MOCK_DATA = false;
 function renderSidebar() {
     return `<aside class="sidebar"><h2>Art Portfolio</h2></aside>`;
 }
@@ -10,50 +11,56 @@ const colorPalettes = [
 ];
 
 async function loadArtPieces() {
-    try {
-        const res = await fetch('artpieces.json');
-        if (!res.ok) throw new Error('No artpieces.json');
-        let realArt = (await res.json()).filter(piece => {
-            if (!piece.title || /FOLDER_TEMPLATE/i.test(piece.title) || /FOLDER_TEMPLATE/i.test(piece.id)) return false;
-            if (!piece.images || !piece.images[0]) return false;
-            return true;
-        });
-        if (!Array.isArray(realArt)) throw new Error('Invalid artpieces.json');
-        let mockups = [];
-        for (let i = 0; i < 12; i++) {
-            const palette = colorPalettes[i % colorPalettes.length];
-            mockups.push({
-                id: 'mock-' + (i+1),
-                title: `Mock Art #${i+1}`,
-                images: [
-                    `https://placehold.co/300x200/${palette[0].replace('#','')}/fff?text=Art+${i+1}`
-                ],
-                colors: palette,
-                shape: ['square','vertical','wide','circle'][i%4],
-                width: 160 + (i%3)*40,
-                height: 120 + (i%2)*40,
-                sold: Math.random() < 0.2
-            });
-        }
-        artPieces = [...realArt, ...mockups];
-    } catch (e) {
-        artPieces = [];
-        for (let i = 0; i < 12; i++) {
-            const palette = colorPalettes[i % colorPalettes.length];
-            artPieces.push({
-                id: 'mock-' + (i+1),
-                title: `Mock Art #${i+1}`,
-                images: [
-                    `https://placehold.co/300x200/${palette[0].replace('#','')}/fff?text=Art+${i+1}`
-                ],
-                colors: palette,
-                shape: ['square','vertical','wide','circle'][i%4],
-                width: 160 + (i%3)*40,
-                height: 120 + (i%2)*40,
-                sold: Math.random() < 0.2
-            });
-        }
-    }
+	try {
+		const res = await fetch('artpieces.json');
+		if (!res.ok) throw new Error('No artpieces.json');
+		let realArt = (await res.json()).filter(piece => {
+			if (!piece.title || /FOLDER_TEMPLATE/i.test(piece.title) || /FOLDER_TEMPLATE/i.test(piece.id)) return false;
+			if (!piece.images || !piece.images[0]) return false;
+			return true;
+		});
+		if (!Array.isArray(realArt)) throw new Error('Invalid artpieces.json');
+		let mockups = [];
+		if (USE_MOCK_DATA) {
+			for (let i = 0; i < 12; i++) {
+				const palette = colorPalettes[i % colorPalettes.length];
+				mockups.push({
+					id: 'mock-' + (i+1),
+					title: `Mock Art #${i+1}`,
+					images: [
+						`https://placehold.co/300x200/${palette[0].replace('#','')}/fff?text=Art+${i+1}`
+					],
+					colors: palette,
+					shape: ['square','vertical','wide','circle'][i%4],
+					width: 160 + (i%3)*40,
+					height: 120 + (i%2)*40,
+					sold: Math.random() < 0.2
+				});
+			}
+		}
+		artPieces = [...realArt, ...mockups];
+	} catch (e) {
+		if (USE_MOCK_DATA) {
+			artPieces = [];
+			for (let i = 0; i < 12; i++) {
+				const palette = colorPalettes[i % colorPalettes.length];
+				artPieces.push({
+					id: 'mock-' + (i+1),
+					title: `Mock Art #${i+1}`,
+					images: [
+						`https://placehold.co/300x200/${palette[0].replace('#','')}/fff?text=Art+${i+1}`
+					],
+					colors: palette,
+					shape: ['square','vertical','wide','circle'][i%4],
+					width: 160 + (i%3)*40,
+					height: 120 + (i%2)*40,
+					sold: Math.random() < 0.2
+				});
+			}
+		} else {
+			artPieces = [];
+		}
+	}
 }
 function renderGallery(pieces) {
 	setTimeout(() => {
@@ -117,114 +124,7 @@ function enableGalleryDragScroll() {
 
 
 
-// Drag-scroll with inertia/momentum using transform: translate, with bounds and rubber-band effect
-function enableGalleryDragScroll() {
-	const container = document.querySelector('.gallery-masonry');
-	if (!container) return;
-	let isDown = false, startX = 0, startY = 0, lastX = 0, lastY = 0, lastTime = 0;
-	let velocityX = 0, velocityY = 0, momentumId = null;
-	let offsetX = 0, offsetY = 0;
-
-	// Calculate bounds for the gallery
-	function getBounds() {
-		const scale = 1.7;
-		const viewW = window.innerWidth / scale;
-		const viewH = window.innerHeight / scale;
-		const contentW = container.offsetWidth;
-		const contentH = container.offsetHeight;
-		// Allow a little overscroll for rubber-band
-		const pad = 60;
-		return {
-			minX: Math.min(viewW - contentW, 0) - pad,
-			maxX: pad,
-			minY: Math.min(viewH - contentH, 0) - pad,
-			maxY: pad
-		};
-	}
-
-	function clamp(val, min, max) {
-		if (val < min) return min;
-		if (val > max) return max;
-		return val;
-	}
-
-	function setTransform() {
-		container.style.transform = `scale(1.7) translate(${offsetX}px, ${offsetY}px)`;
-	}
-	setTransform();
-
-	function onDown(e) {
-		isDown = true;
-		container.classList.add('dragging');
-		startX = (e.touches ? e.touches[0].clientX : e.clientX);
-		startY = (e.touches ? e.touches[0].clientY : e.clientY);
-		lastX = startX;
-		lastY = startY;
-		lastTime = Date.now();
-		velocityX = 0;
-		velocityY = 0;
-		if (momentumId) cancelAnimationFrame(momentumId);
-	}
-	function onMove(e) {
-		if (!isDown) return;
-		const x = (e.touches ? e.touches[0].clientX : e.clientX);
-		const y = (e.touches ? e.touches[0].clientY : e.clientY);
-		const dx = x - lastX;
-		const dy = y - lastY;
-		offsetX += dx;
-		offsetY += dy;
-		// Rubber-band effect
-		const bounds = getBounds();
-		if (offsetX < bounds.minX) offsetX = bounds.minX + (offsetX - bounds.minX) * 0.2;
-		if (offsetX > bounds.maxX) offsetX = bounds.maxX + (offsetX - bounds.maxX) * 0.2;
-		if (offsetY < bounds.minY) offsetY = bounds.minY + (offsetY - bounds.minY) * 0.2;
-		if (offsetY > bounds.maxY) offsetY = bounds.maxY + (offsetY - bounds.maxY) * 0.2;
-		setTransform();
-		const now = Date.now();
-		const dt = now - lastTime;
-		velocityX = dx / (dt || 1);
-		velocityY = dy / (dt || 1);
-		lastX = x;
-		lastY = y;
-		lastTime = now;
-	}
-	function onUp() {
-		isDown = false;
-		container.classList.remove('dragging');
-		// Inertia with bounds
-		let vx = velocityX * 8, vy = velocityY * 8; // Lower multiplier for less speed
-		function momentum() {
-			offsetX += vx;
-			offsetY += vy;
-			const bounds = getBounds();
-			// Rubber-band on release
-			if (offsetX < bounds.minX) vx += (bounds.minX - offsetX) * 0.06;
-			if (offsetX > bounds.maxX) vx += (bounds.maxX - offsetX) * 0.06;
-			if (offsetY < bounds.minY) vy += (bounds.minY - offsetY) * 0.06;
-			if (offsetY > bounds.maxY) vy += (bounds.maxY - offsetY) * 0.06;
-			setTransform();
-			vx *= 0.93;
-			vy *= 0.93;
-			if (Math.abs(vx) > 0.5 || Math.abs(vy) > 0.5 ||
-					offsetX < bounds.minX - 1 || offsetX > bounds.maxX + 1 ||
-					offsetY < bounds.minY - 1 || offsetY > bounds.maxY + 1) {
-				momentumId = requestAnimationFrame(momentum);
-			} else {
-				// Snap to bounds if needed
-				offsetX = clamp(offsetX, bounds.minX, bounds.maxX);
-				offsetY = clamp(offsetY, bounds.minY, bounds.maxY);
-				setTransform();
-			}
-		}
-		momentum();
-	}
-	container.addEventListener('mousedown', onDown);
-	container.addEventListener('touchstart', onDown, {passive: false});
-	window.addEventListener('mousemove', onMove);
-	window.addEventListener('touchmove', onMove, {passive: false});
-	window.addEventListener('mouseup', onUp);
-	window.addEventListener('touchend', onUp);
-}
+// Drag-scroll logic now handled by dragScroll.js
 
 // Simple bin-packing for edge-to-edge layout
 function packMasonryTiles() {

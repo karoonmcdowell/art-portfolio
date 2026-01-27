@@ -1,0 +1,68 @@
+[
+  {
+    "id": "foldertemplate",
+    "title": "#FOLDER_TEMPLATE",
+    "images": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "banana-1",
+    "title": "Banana 1",
+    "images": [
+      "images/artpieces/Banana 1/main/Art_Photo_IndividualsAndComp-08.jpg",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "female-portrait-1",
+    "title": "Female Portrait 1",
+    "images": [
+      "images/artpieces/Female Portrait 1/main/Art_Photo_IndividualsAndComp-01.jpg",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "ocean-landscape-vert-1",
+    "title": "Ocean Landscape Vert 1",
+    "images": [
+      "images/artpieces/Ocean Landscape Vert 1/main/Art_Photo_IndividualsAndComp-06.jpg",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "old-man-portrait-1",
+    "title": "Old Man Portrait 1",
+    "images": [
+      "images/artpieces/Old Man Portrait 1/main/Art_Photo_IndividualsAndComp-02.jpg",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "young-man-portrait-1",
+    "title": "Young Man Portrait 1",
+    "images": [
+      "images/artpieces/Young Man Portrait 1/main/Art_Photo_IndividualsAndComp-04.jpg",
+      null,
+      null,
+      null,
+      null
+    ]
+  }
+]

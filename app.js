@@ -1,4 +1,4 @@
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 function renderSidebar() {
     return `<aside class="sidebar"><h2>Art Portfolio</h2></aside>`;
 }
